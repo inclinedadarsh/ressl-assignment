@@ -4,4 +4,9 @@ version = "0.1.0"
 description = "API Server for Ressl Assignment"
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "fastapi>=0.120.4",
+    "pydantic>=2.12.3",
+    "python-multipart>=0.0.20",
+    "uvicorn>=0.38.0",
+]
