@@ -10,7 +10,15 @@ class KeywordMatch(BaseModel):
 
 class FileSearchResult(BaseModel):
     file_name: str
+    original_file_name: str
+    is_original: bool
     matches: List[KeywordMatch]
+
+
+class FileInfo(BaseModel):
+    file_name: str
+    original_file_name: str
+    is_original: bool
 
 
 class SearchResponse(BaseModel):
