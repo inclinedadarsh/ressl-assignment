@@ -93,5 +93,19 @@ def search_keywords(
     return SearchResponse(results=results)
 
 
+@mcp.tool()
+def list_files() -> List[str]:
+    """
+    List all files in the shared uploads directory.
+
+    Returns:
+        List[str]: A list of file names.
+    """
+    if not UPLOADS_DIR.exists():
+        return []
+
+    return [f.name for f in UPLOADS_DIR.iterdir() if f.is_file()]
+
+
 if __name__ == "__main__":
     mcp.run()
