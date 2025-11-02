@@ -1,6 +1,7 @@
 from mcp.server.fastmcp import FastMCP
 from typing import List
 from pathlib import Path
+import re
 
 from schema import SearchResponse, FileSearchResult, KeywordMatch
 
@@ -10,7 +11,9 @@ UPLOADS_DIR = Path(__file__).parent.parent / "shared-uploads"
 
 
 @mcp.tool()
-def search_keywords(keywords: List[str], files: List[str] = None) -> SearchResponse:
+def search_keywords(
+    keywords: List[str], files: List[str] = None, regex: bool = False
+) -> SearchResponse:
     """
     Search for given keywords in one or more files.
 
@@ -18,6 +21,7 @@ def search_keywords(keywords: List[str], files: List[str] = None) -> SearchRespo
         keywords (List[str]): Keywords to search for.
         files (List[str], optional): Specific files to search in.
             If not provided, the search will include all files in the current directory.
+        regex (bool, optional): If True, treat keywords as regex patterns. Defaults to False.
 
     Returns:
         SearchResponse: A structured response containing the results of the search.
@@ -55,9 +59,25 @@ def search_keywords(keywords: List[str], files: List[str] = None) -> SearchRespo
         try:
             with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
                 for line_num, line in enumerate(f, start=1):
-                    line_lower = line.lower()
                     for keyword in keywords:
-                        if keyword.lower() in line_lower:
+                        match_found = False
+
+                        if regex:
+                            try:
+                                # Compile regex pattern with case-insensitive flag
+                                pattern = re.compile(keyword, re.IGNORECASE)
+                                if pattern.search(line):
+                                    match_found = True
+                            except re.error as e:
+                                raise ValueError(
+                                    f"Invalid regex pattern '{keyword}': {str(e)}"
+                                )
+                        else:
+                            # Simple substring matching (case-insensitive)
+                            if keyword.lower() in line.lower():
+                                match_found = True
+
+                        if match_found:
                             matches.append(
                                 KeywordMatch(
                                     keyword=keyword,
