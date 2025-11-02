@@ -120,14 +120,20 @@ def search_keywords(
             with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
                 for line_num, line in enumerate(f, start=1):
                     for keyword in keywords:
-                        match_found = False
-
                         if regex:
                             try:
                                 # Compile regex pattern with case-insensitive flag
                                 pattern = re.compile(keyword, re.IGNORECASE)
-                                if pattern.search(line):
-                                    match_found = True
+                                # Find all matches in the line
+                                for match in pattern.finditer(line):
+                                    matched_text = match.group(0)
+                                    matches.append(
+                                        KeywordMatch(
+                                            keyword=matched_text,
+                                            line_number=line_num,
+                                            line_content=line.rstrip("\n\r"),
+                                        )
+                                    )
                             except re.error as e:
                                 raise ValueError(
                                     f"Invalid regex pattern '{keyword}': {str(e)}"
@@ -135,16 +141,13 @@ def search_keywords(
                         else:
                             # Simple substring matching (case-insensitive)
                             if keyword.lower() in line.lower():
-                                match_found = True
-
-                        if match_found:
-                            matches.append(
-                                KeywordMatch(
-                                    keyword=keyword,
-                                    line_number=line_num,
-                                    line_content=line.rstrip("\n\r"),
+                                matches.append(
+                                    KeywordMatch(
+                                        keyword=keyword,
+                                        line_number=line_num,
+                                        line_content=line.rstrip("\n\r"),
+                                    )
                                 )
-                            )
         except Exception as e:
             raise IOError(f"Error reading file '{file_name}': {str(e)}")
 
