@@ -2,7 +2,7 @@ import shutil
 from pathlib import Path
 from fastapi import FastAPI, File, UploadFile, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from schema import UploadFileResponse
+from schema import GetFilesResponse, UploadFileResponse
 
 app = FastAPI()
 
@@ -59,3 +59,12 @@ async def upload_file(files: list[UploadFile] = File(..., max_items=10)):
             shutil.copyfileobj(file.file, f)
             filenames.append(file.filename)
     return UploadFileResponse(filenames=filenames)
+
+
+@app.get("/files", response_model=GetFilesResponse, status_code=status.HTTP_200_OK)
+async def get_files():
+    if not Path("../shared-uploads").exists():
+        return GetFilesResponse(filenames=[])
+    upload_dir = Path("../shared-uploads")
+    files = [f.name for f in upload_dir.glob("*") if f.is_file()]
+    return GetFilesResponse(filenames=files)
