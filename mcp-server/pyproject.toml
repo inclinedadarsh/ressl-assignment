@@ -4,4 +4,7 @@ version = "0.1.0"
 description = "MCP Server for Ressl Assignment"
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "mcp[cli]>=1.20.0",
+    "pydantic>=2.12.3",
+]
