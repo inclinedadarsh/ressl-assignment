@@ -1,3 +1,4 @@
+import os
 from mcp.server.fastmcp import FastMCP
 from typing import List
 from pathlib import Path
@@ -7,7 +8,12 @@ from schema import SearchResponse, FileSearchResult, KeywordMatch, FileInfo
 
 mcp = FastMCP("ressl-assignment-mcp-server")
 
-UPLOADS_DIR = Path(__file__).parent.parent / "shared-uploads"
+# Get shared uploads directory from environment variable or use default
+UPLOADS_DIR = Path(
+    os.getenv(
+        "SHARED_UPLOADS_DIR", str(Path(__file__).parent.parent / "shared-uploads")
+    )
+)
 
 # File extensions that get parsed to .markdown files
 PARSED_EXTENSIONS = {".pdf", ".doc", ".docx", ".ppt", ".pptx", ".xls", ".xlsx"}

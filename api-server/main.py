@@ -1,3 +1,4 @@
+import os
 import shutil
 import tempfile
 from pathlib import Path
@@ -7,6 +8,9 @@ from markitdown import MarkItDown
 from schema import GetFilesResponse, UploadFileResponse, FileInfo
 
 app = FastAPI()
+
+# Get shared uploads directory from environment variable or use default
+SHARED_UPLOADS_DIR = Path(os.getenv("SHARED_UPLOADS_DIR", "../shared-uploads"))
 
 app.add_middleware(
     CORSMiddleware,
@@ -59,7 +63,7 @@ PARSEABLE_EXTENSIONS = {
     "/upload", response_model=UploadFileResponse, status_code=status.HTTP_201_CREATED
 )
 async def upload_file(files: list[UploadFile] = File(..., max_items=10)):
-    upload_dir = Path("../shared-uploads")
+    upload_dir = SHARED_UPLOADS_DIR
     upload_dir.mkdir(parents=True, exist_ok=True)
 
     markitdown = MarkItDown()
@@ -144,9 +148,9 @@ async def upload_file(files: list[UploadFile] = File(..., max_items=10)):
 
 @app.get("/files", response_model=GetFilesResponse, status_code=status.HTTP_200_OK)
 async def get_files():
-    if not Path("../shared-uploads").exists():
+    if not SHARED_UPLOADS_DIR.exists():
         return GetFilesResponse(files=[])
-    upload_dir = Path("../shared-uploads")
+    upload_dir = SHARED_UPLOADS_DIR
     file_infos = []
 
     for file_path in upload_dir.glob("*"):
